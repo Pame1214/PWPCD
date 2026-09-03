@@ -1,0 +1,5 @@
+# Credenciais e configurações locais
+config.ini
+.env
+.env.*
+!.env.example

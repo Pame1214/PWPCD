@@ -14,7 +14,7 @@
       </button>
 
       <div class="side-panel__login">
-        <button type="button" class="login-button">Login</button>
+        <a class="login-button" href="#login">Login</a>
       </div>
 
       <div class="side-panel__top">
@@ -23,18 +23,29 @@
 
       <nav class="side-panel__nav" aria-label="Navegação lateral">
         <button type="button" class="side-panel__button active">Início</button>
-        <button type="button" class="side-panel__button">Categorias</button>
-        <button type="button" class="side-panel__button">Recursos</button>
+        <a class="side-panel__button" href="categorias.html">Categorias</a>
+        <a class="side-panel__button" href="categorias.html">Recursos</a>
       </nav>
     </aside>
 
     <div class="content-area">
       <header id="site-header" class="site-header"></header>
 
-      <main>
-        <h2>Escolha uma categoria</h2>
-        <section id="categorias" class="categorias"></section>
-      </main>
+        <main class="login-main" id="login">
+          <section class="login-card" aria-labelledby="login-title">
+            <p class="eyebrow">Área de acesso</p>
+            <h2 id="login-title">Entre para continuar</h2>
+            <p class="login-description">Use qualquer informação para testar este formulário demonstrativo.</p>
+            <form action="https://lorem.com" method="get">
+              <label for="email">E-mail</label>
+              <input id="email" name="email" type="email" autocomplete="email" required>
+              <label for="senha">Senha</label>
+              <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+              <button class="login-submit" type="submit">Entrar</button>
+            </form>
+            <a class="explore-link" href="categorias.html">Explorar categorias sem entrar</a>
+          </section>
+        </main>
     </div>
   </div>
 

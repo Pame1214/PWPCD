@@ -53,7 +53,9 @@ const renderHeader = async () => {
   if (!headerContainer) return;
 
   try {
-    const response = await fetch("header.html");
+    const isNestedPage = /\/(Defs|debug)\//.test(window.location.pathname);
+    const headerPath = isNestedPage ? "../header.html" : "header.html";
+    const response = await fetch(headerPath);
 
     if (!response.ok) {
       throw new Error("Falha ao carregar o cabeçalho");
@@ -76,7 +78,7 @@ const renderHeader = async () => {
 renderHeader();
 initSidebar();
 
-categorias.forEach((categoria) => {
+if (container) categorias.forEach((categoria) => {
   const elemento = document.createElement("details");
   elemento.className = "categoria";
 
@@ -84,7 +86,17 @@ categorias.forEach((categoria) => {
     <summary>${categoria.nome}</summary>
     <ul class="subdeficiencias">
       ${categoria.subdeficiencias
-        .map((item) => `<li>${item}</li>`)
+        .map((item) => {
+          const paginas = {
+            "Mobilidade reduzida": "Defs/mobred.html",
+            Paraplegia: "Defs/paraplegia.html",
+            Tetraplegia: "Defs/tetraplegia.html",
+            "Deficiência intelectual": "Defs/deficiencia-intelectual.html",
+            "Transtornos do desenvolvimento": "Defs/transtornos-desenvolvimento.html"
+          };
+          const pagina = paginas[item] || null;
+          return `<li>${pagina ? `<a href="${pagina}">${item}</a>` : item}</li>`;
+        })
         .join("")}
     </ul>
   `;
