@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug do banco | PWPCD</title>
+  <link rel="stylesheet" href="../Css/css_idx.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="side-panel is-collapsed" aria-label="Menu lateral">
+      <button type="button" class="panel-toggle" aria-label="Abrir ou fechar menu lateral" aria-expanded="false"><span class="panel-toggle__arrow">›</span></button>
+      <div class="side-panel__login"><a class="login-button" href="../index.html#login">Login</a></div>
+      <div class="side-panel__top"><span class="side-panel__label">Menu</span></div>
+      <nav class="side-panel__nav" aria-label="Navegação lateral">
+        <a class="side-panel__button" href="../index.html">Início</a>
+        <a class="side-panel__button" href="../categorias.html">Categorias</a>
+        <a class="side-panel__button active" href="debug.html">Debug</a>
+      </nav>
+    </aside>
+    <div class="content-area">
+      <header id="site-header" class="site-header"><div class="header-content"><h1>Teste do banco</h1><p>Leitura e gravação no PostgreSQL do Neon</p></div></header>
+      <main class="debug-main">
+        <section class="debug-card" aria-labelledby="debug-title">
+          <h2 id="debug-title">Conexão Neon</h2>
+          <p class="debug-warning">Diagnóstico completo do PostgreSQL: conexão, tabelas, colunas, leitura, consulta e operações de teste.</p>
+          <form id="neon-setup-form">
+            <h3>Configurar conexão pelo Neon CLI</h3>
+            <label for="project-id">ID do projeto</label>
+            <input id="project-id" value="shy-rain-00441372" required>
+            <label for="branch">ID ou nome do branch</label>
+            <input id="branch" value="br-still-snow-ac3n058j" required>
+            <label for="role-name">Role (opcional)</label>
+            <input id="role-name" placeholder="neondb_owner">
+            <label for="database-name">Banco (opcional)</label>
+            <input id="database-name" value="neondb">
+            <button class="login-submit" type="submit">Obter e salvar conexão</button>
+          </form>
+          <div class="debug-divider"></div>
+          <div class="debug-actions">
+            <button class="login-submit" id="health-button" type="button">Testar conexão</button>
+            <button class="debug-read" id="tables-button" type="button">Listar tabelas</button>
+            <button class="debug-read" id="columns-button" type="button">Ver colunas</button>
+          </div>
+          <form id="debug-form">
+            <label for="table">Tabela</label>
+            <input id="table" name="table" type="text" value="debug_registros" pattern="[A-Za-z_][A-Za-z0-9_]*" required>
+            <label for="payload">JSON para gravar</label>
+            <textarea id="payload" name="payload" rows="5">{"mensagem":"teste do PWPCD","origem":"debug"}</textarea>
+            <div class="debug-actions">
+              <button class="login-submit" type="submit">Gravar registro</button>
+              <button class="debug-read" id="read-button" type="button">Ler registros</button>
+            </div>
+          </form>
+          <div class="debug-divider"></div>
+          <form id="mutation-form">
+            <label for="record-id">ID para alterar ou excluir</label>
+            <input id="record-id" type="number" min="1" placeholder="Ex.: 1">
+            <label for="update-payload">JSON das colunas a atualizar</label>
+            <textarea id="update-payload" rows="3">{"mensagem":"atualizado pelo debug"}</textarea>
+            <div class="debug-actions">
+              <button class="debug-read" id="update-button" type="submit">Atualizar registro</button>
+              <button class="debug-danger" id="delete-button" type="button">Excluir registro</button>
+            </div>
+          </form>
+          <div class="debug-divider"></div>
+          <form id="query-form">
+            <label for="query">Consulta SQL somente leitura</label>
+            <textarea id="query" rows="4">SELECT * FROM debug_registros ORDER BY id DESC LIMIT 20</textarea>
+            <button class="debug-read" type="submit">Executar consulta</button>
+          </form>
+          <p id="debug-status" class="debug-status" role="status" aria-live="polite">Aguardando teste. O acesso ao banco usa a connection string do servidor.</p>
+          <pre id="debug-output" class="debug-output" aria-label="Resultado da requisição">Nenhum resultado ainda.</pre>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="../Js/js_idx.js"></script>
+  <script src="debug.js"></script>
+</body>
+</html>

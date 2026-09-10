@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website para Pessoas com Deficiência</title>
+  <link rel="stylesheet" href="Css/css_idx.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="side-panel is-collapsed" aria-label="Menu lateral">
+      <button type="button" class="panel-toggle" aria-label="Abrir ou fechar menu lateral" aria-expanded="false">
+        <span class="panel-toggle__arrow">›</span>
+      </button>
+
+      <div class="side-panel__login">
+        <a class="login-button" href="#login">Login</a>
+      </div>
+
+      <div class="side-panel__top">
+        <span class="side-panel__label">Menu</span>
+      </div>
+
+      <nav class="side-panel__nav" aria-label="Navegação lateral">
+        <button type="button" class="side-panel__button active">Início</button>
+        <a class="side-panel__button" href="categorias.html">Categorias</a>
+        <a class="side-panel__button" href="categorias.html">Recursos</a>
+      </nav>
+    </aside>
+
+    <div class="content-area">
+      <header id="site-header" class="site-header"></header>
+
+        <main class="login-main" id="login">
+          <section class="login-card" aria-labelledby="login-title">
+            <p class="eyebrow">Área de acesso</p>
+            <h2 id="login-title">Entre para continuar</h2>
+            <p class="login-description">Entre com um usuário cadastrado no sistema.</p>
+            <form id="login-form">
+              <label for="email">Usuário</label>
+              <input id="email" name="email" autocomplete="username" required>
+              <label for="senha">Senha</label>
+              <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+              <button class="login-submit" type="submit">Entrar</button>
+            </form>
+            <p id="login-status" class="debug-status" role="status" aria-live="polite"></p>
+            <h3>Registrar usuário</h3>
+            <form id="register-form">
+              <label for="register-username">Usuário</label>
+              <input id="register-username" autocomplete="username" required>
+              <label for="register-password">Senha</label>
+              <input id="register-password" type="password" autocomplete="new-password" required>
+              <button class="login-submit" type="submit">Registrar</button>
+            </form>
+            <p id="register-status" class="debug-status" role="status" aria-live="polite"></p>
+            <a class="explore-link" href="categorias.html">Explorar categorias sem entrar</a>
+          </section>
+          <section class="login-card" aria-labelledby="record-title">
+            <p class="eyebrow">Banco de dados</p>
+            <h2 id="record-title">Adicionar registro</h2>
+            <p class="login-description">Os dados são enviados ao PostgreSQL pelo servidor.</p>
+            <form id="record-form">
+              <label for="record-message">Mensagem</label>
+              <textarea id="record-message" rows="4" maxlength="5000" required></textarea>
+              <label for="record-origin">Origem</label>
+              <input id="record-origin" value="site" maxlength="120" required>
+              <button class="login-submit" type="submit">Salvar no banco</button>
+            </form>
+            <p id="record-status" class="debug-status" role="status" aria-live="polite"></p>
+          </section>
+        </main>
+    </div>
+  </div>
+
+  <script src="Js/js_idx.js"></script>
+</body>
+</html>
