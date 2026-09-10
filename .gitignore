@@ -5,6 +5,7 @@ Config.local.ini
 Config.ini
 .cloudflare-static
 .wrangler
+node_modules
 .env
 .env.*
 !.env.example
