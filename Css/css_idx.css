@@ -149,7 +149,7 @@ body {
 }
 
 .side-panel__login {
-  padding-top: 0.2rem;
+  display: none;
 }
 
 .login-button {
@@ -207,16 +207,82 @@ body {
   box-shadow: 0 8px 22px rgba(47, 111, 237, 0.15);
 }
 
+.header-links {
+  position: absolute;
+  top: 0.8rem;
+  left: 1rem;
+  right: 1rem;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.header-link {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 8px;
+  color: var(--branco);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  background: rgba(15, 23, 42, 0.2);
+  pointer-events: auto;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.header-link:hover,
+.header-link:focus-visible {
+  background: rgba(15, 23, 42, 0.45);
+  transform: translateY(-1px);
+}
+
 .header-content {
   max-width: 760px;
   margin: 0 auto;
-  padding-top: 0.4rem;
+  padding-top: 2.8rem;
 }
 
 .theme-toggle-wrap {
   position: absolute;
-  top: 0.8rem;
+  top: 3.4rem;
   right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.user-display {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  color: var(--branco);
+  font-size: 0.78rem;
+  font-weight: 700;
+  background: rgba(15, 23, 42, 0.22);
+  white-space: nowrap;
+}
+
+.sidebar-user {
+  display: block;
+  padding: 0.65rem 0.5rem;
+  border-top: 1px solid var(--panel-border);
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.sidebar-user__name {
+  overflow: hidden;
+  color: var(--panel-fg);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sidebar-user__name::before {
+  content: "●";
+  margin-right: 0.4rem;
+  color: #42d77d;
+  font-size: 0.65rem;
 }
 
 .theme-switch {
@@ -629,11 +695,28 @@ main h2 {
   flex: 1 1 180px;
 }
 
+.debug-divider {
+  height: 1px;
+  margin: 1.4rem 0;
+  background: var(--borda);
+}
+
 .debug-read {
   padding: 0.85rem 1rem;
   color: var(--azul);
   background: transparent;
   border: 1px solid var(--azul);
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.debug-danger {
+  padding: 0.85rem 1rem;
+  color: #fff;
+  background: #b42318;
+  border: 1px solid #b42318;
   border-radius: 8px;
   font: inherit;
   font-weight: 700;
@@ -714,7 +797,18 @@ main h2 {
 
   .theme-toggle-wrap {
     position: static;
-    margin: 0.8rem auto 0;
+    margin: 0.6rem auto 0;
+  }
+
+  .header-links {
+    top: 0.7rem;
+    left: 0.75rem;
+    right: 0.75rem;
+  }
+
+  .header-link {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.78rem;
   }
 
   main {
@@ -724,6 +818,10 @@ main h2 {
 
   .site-header {
     padding: 0.8rem 0.75rem 1.1rem;
+  }
+
+  .header-content {
+    padding-top: 2.7rem;
   }
 
   .categoria summary {

@@ -1,5 +1,10 @@
 # Credenciais e configurações locais
-config.ini
+senha
+senha.txt
+Config.local.ini
+Config.ini
+.cloudflare-static
+.wrangler
 .env
 .env.*
 !.env.example

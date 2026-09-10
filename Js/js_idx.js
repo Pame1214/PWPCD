@@ -16,6 +16,15 @@ const container = document.querySelector("#categorias");
 const headerContainer = document.querySelector("#site-header");
 const sidePanel = document.querySelector(".side-panel");
 const panelToggle = document.querySelector(".panel-toggle");
+const loginForm = document.querySelector("#login-form");
+const loginStatus = document.querySelector("#login-status");
+const registerForm = document.querySelector("#register-form");
+const registerStatus = document.querySelector("#register-status");
+const recordForm = document.querySelector("#record-form");
+const recordStatus = document.querySelector("#record-status");
+const API_BASE = String(window.PWPCD_API_BASE || "").replace(/\/$/, "");
+
+const apiFetch = (path, options) => fetch(`${API_BASE}${path}`, options);
 
 const applyTheme = (theme, themeToggle = null) => {
   document.body.setAttribute("data-theme", theme);
@@ -39,6 +48,34 @@ const initTheme = () => {
   });
 };
 
+const initHeaderLinks = () => {
+  const isNestedPage = /\/(Defs|debug)\//.test(window.location.pathname);
+  document.querySelectorAll(".header-link[data-root-path]").forEach((link) => {
+    const rootPath = link.dataset.rootPath;
+    link.href = isNestedPage ? `../${rootPath}` : rootPath;
+  });
+};
+
+const initUserControls = async () => {
+  try {
+    const response = await apiFetch("/api/session");
+    const data = await response.json();
+    if (!data.authenticated || !data.username) return;
+    const headerUser = document.createElement("span");
+    headerUser.className = "user-display";
+    headerUser.textContent = `Conectado como ${data.username}`;
+    document.querySelector(".theme-toggle-wrap")?.append(headerUser);
+
+    const sidebarUser = document.createElement("div");
+    sidebarUser.className = "sidebar-user";
+    sidebarUser.innerHTML = `<span class="sidebar-user__name"></span>`;
+    sidebarUser.querySelector(".sidebar-user__name").textContent = data.username;
+    document.querySelector(".side-panel__nav")?.before(sidebarUser);
+  } catch {
+    return;
+  }
+};
+
 const initSidebar = () => {
   if (!sidePanel || !panelToggle) return;
 
@@ -46,6 +83,94 @@ const initSidebar = () => {
     const isCollapsed = sidePanel.classList.toggle("is-collapsed");
     panelToggle.setAttribute("aria-expanded", String(!isCollapsed));
     panelToggle.setAttribute("aria-label", isCollapsed ? "Abrir menu lateral" : "Fechar menu lateral");
+  });
+};
+
+const initLogin = () => {
+  if (!loginForm || !loginStatus) return;
+
+  loginForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submitButton = loginForm.querySelector("button[type=submit]");
+    submitButton.disabled = true;
+    loginStatus.textContent = "Entrando...";
+
+    try {
+      const response = await apiFetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: document.querySelector("#email").value,
+          password_hash: await hashPassword(document.querySelector("#senha").value)
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Login recusado pelo Neon Auth.");
+      window.location.href = "categorias.html";
+    } catch (error) {
+      loginStatus.textContent = `Erro no login: ${error.message}`;
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+};
+
+const hashPassword = async (password) => {
+  const bytes = new TextEncoder().encode(password);
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+};
+
+const initRegister = () => {
+  if (!registerForm || !registerStatus) return;
+  registerForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      const response = await apiFetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: document.querySelector("#register-username").value,
+          password_hash: await hashPassword(document.querySelector("#register-password").value)
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Não foi possível registrar.");
+      window.location.href = "categorias.html";
+    } catch (error) {
+      registerStatus.textContent = `Erro no cadastro: ${error.message}`;
+    }
+  });
+};
+
+const initRecordForm = () => {
+  if (!recordForm || !recordStatus) return;
+
+  recordForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submitButton = recordForm.querySelector("button[type=submit]");
+    submitButton.disabled = true;
+    recordStatus.textContent = "Salvando...";
+
+    try {
+      const response = await apiFetch("/api/records", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mensagem: document.querySelector("#record-message").value,
+          origem: document.querySelector("#record-origin").value
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Não foi possível salvar o registro.");
+      recordStatus.textContent = `Registro ${data.record.id} salvo com sucesso.`;
+      recordForm.reset();
+      document.querySelector("#record-origin").value = "site";
+    } catch (error) {
+      recordStatus.textContent = `Erro ao salvar: ${error.message}`;
+    } finally {
+      submitButton.disabled = false;
+    }
   });
 };
 
@@ -72,11 +197,15 @@ const renderHeader = async () => {
     `;
   }
 
+  initHeaderLinks();
   initTheme();
 };
 
-renderHeader();
+renderHeader().then(initUserControls);
 initSidebar();
+initLogin();
+initRegister();
+initRecordForm();
 
 if (container) categorias.forEach((categoria) => {
   const elemento = document.createElement("details");

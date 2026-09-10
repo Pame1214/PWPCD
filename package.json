@@ -4,6 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node debug/server.js",
+    "build:static": "node scripts/build-static.js",
+    "deploy": "npm run build:static && wrangler deploy",
+    "preview": "npm run build:static && wrangler dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +24,8 @@
   "homepage": "https://github.com/Pame1214/PWPCD#readme",
   "dependencies": {
     "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.130.0"
   }
 }

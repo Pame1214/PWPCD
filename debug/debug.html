@@ -23,7 +23,25 @@
       <main class="debug-main">
         <section class="debug-card" aria-labelledby="debug-title">
           <h2 id="debug-title">Conexão Neon</h2>
-          <p class="debug-warning">O servidor local lê a <code>connection_string</code> do arquivo <code>config.ini</code> e conecta diretamente ao PostgreSQL do Neon.</p>
+          <p class="debug-warning">Diagnóstico completo do PostgreSQL: conexão, tabelas, colunas, leitura, consulta e operações de teste.</p>
+          <form id="neon-setup-form">
+            <h3>Configurar conexão pelo Neon CLI</h3>
+            <label for="project-id">ID do projeto</label>
+            <input id="project-id" value="shy-rain-00441372" required>
+            <label for="branch">ID ou nome do branch</label>
+            <input id="branch" value="br-still-snow-ac3n058j" required>
+            <label for="role-name">Role (opcional)</label>
+            <input id="role-name" placeholder="neondb_owner">
+            <label for="database-name">Banco (opcional)</label>
+            <input id="database-name" value="neondb">
+            <button class="login-submit" type="submit">Obter e salvar conexão</button>
+          </form>
+          <div class="debug-divider"></div>
+          <div class="debug-actions">
+            <button class="login-submit" id="health-button" type="button">Testar conexão</button>
+            <button class="debug-read" id="tables-button" type="button">Listar tabelas</button>
+            <button class="debug-read" id="columns-button" type="button">Ver colunas</button>
+          </div>
           <form id="debug-form">
             <label for="table">Tabela</label>
             <input id="table" name="table" type="text" value="debug_registros" pattern="[A-Za-z_][A-Za-z0-9_]*" required>
@@ -33,6 +51,23 @@
               <button class="login-submit" type="submit">Gravar registro</button>
               <button class="debug-read" id="read-button" type="button">Ler registros</button>
             </div>
+          </form>
+          <div class="debug-divider"></div>
+          <form id="mutation-form">
+            <label for="record-id">ID para alterar ou excluir</label>
+            <input id="record-id" type="number" min="1" placeholder="Ex.: 1">
+            <label for="update-payload">JSON das colunas a atualizar</label>
+            <textarea id="update-payload" rows="3">{"mensagem":"atualizado pelo debug"}</textarea>
+            <div class="debug-actions">
+              <button class="debug-read" id="update-button" type="submit">Atualizar registro</button>
+              <button class="debug-danger" id="delete-button" type="button">Excluir registro</button>
+            </div>
+          </form>
+          <div class="debug-divider"></div>
+          <form id="query-form">
+            <label for="query">Consulta SQL somente leitura</label>
+            <textarea id="query" rows="4">SELECT * FROM debug_registros ORDER BY id DESC LIMIT 20</textarea>
+            <button class="debug-read" type="submit">Executar consulta</button>
           </form>
           <p id="debug-status" class="debug-status" role="status" aria-live="polite">Aguardando teste. O acesso ao banco usa a connection string do servidor.</p>
           <pre id="debug-output" class="debug-output" aria-label="Resultado da requisição">Nenhum resultado ainda.</pre>
