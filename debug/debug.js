@@ -1,169 +1,81 @@
-const debugForm = document.querySelector("#debug-form");
-const readButton = document.querySelector("#read-button");
-const healthButton = document.querySelector("#health-button");
-const tablesButton = document.querySelector("#tables-button");
-const columnsButton = document.querySelector("#columns-button");
-const mutationForm = document.querySelector("#mutation-form");
-const deleteButton = document.querySelector("#delete-button");
-const queryForm = document.querySelector("#query-form");
-const neonSetupForm = document.querySelector("#neon-setup-form");
-const statusElement = document.querySelector("#debug-status");
-const outputElement = document.querySelector("#debug-output");
-const API_BASE = String(window.PWPCD_API_BASE || "").replace(/\/$/, "");
+(() => {
+  const form = document.querySelector("#debug-form");
+  const tokenInput = document.querySelector("#admin-token");
+  const idInput = document.querySelector("#record-id");
+  const status = document.querySelector("#debug-status");
+  const output = document.querySelector("#debug-output");
+  let busy = false;
 
-const getSettings = () => {
-  const table = document.querySelector("#table").value.trim();
+  const run = async (path, message, body) => {
+    if (busy) return;
+    busy = true;
+    status.textContent = "Aguarde...";
+    output.textContent = "";
 
-  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(table)) {
-    throw new Error("O nome da tabela só pode conter letras, números e underscore.");
-  }
-
-  return { table };
-};
-
-const showResult = (message, data) => {
-  statusElement.textContent = message;
-  outputElement.textContent = JSON.stringify(data, null, 2);
-};
-
-const request = async (url, options = {}) => {
-  let response;
-
-  try {
-    response = await fetch(`${API_BASE}${url}`, options);
-  } catch {
-    throw new Error("Não foi possível acessar a API. Verifique o endereço, o servidor local e as permissões de CORS.");
-  }
-
-  const text = await response.text();
-  let data;
-
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
-  }
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error("Faça login no Neon Auth antes de acessar o banco.");
+    try {
+      const headers = {};
+      if (path.startsWith("/api/db/")) {
+        const token = tokenInput.value.trim();
+        if (!token) {
+          tokenInput.focus();
+          throw new Error("Informe a chave administrativa.");
+        }
+        headers.Authorization = `Bearer ${token}`;
+      }
+      const options = { headers };
+      if (body) {
+        headers["Content-Type"] = "application/json";
+        options.method = "POST";
+        options.body = JSON.stringify(body);
+      }
+      const response = await fetch(path, options);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Não foi possível concluir a operação.");
+      status.textContent = message;
+      output.textContent = JSON.stringify(result, null, 2);
+      return result;
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      busy = false;
     }
+  };
 
-    if (response.status === 404) {
-      throw new Error("Tabela não encontrada. Execute debug/schema.sql no SQL Editor do Neon e confirme o nome da tabela.");
-    }
+  const hasRecordId = () => {
+    if (idInput.value.trim() && idInput.checkValidity()) return true;
+    status.textContent = "Informe o ID do registro.";
+    idInput.focus();
+    return false;
+  };
 
-    const detail = data && typeof data === "object"
-      ? data.error || data.upstream_body || JSON.stringify(data)
-      : data || "A API não retornou detalhes.";
-    throw new Error(`${response.status} ${response.statusText || ""}: ${detail}`.trim());
-  }
+  document.querySelector("#health-button").addEventListener("click", () => {
+    void run("/api/health", "Conexão com o PostgreSQL verificada.");
+  });
+  document.querySelector("#read-button").addEventListener("click", () => {
+    void run("/api/db/read", "Leitura concluída.");
+  });
 
-  return data;
-};
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const update = event.submitter?.value === "update";
+    if (update && !hasRecordId()) return;
+    const result = await run(
+      update ? "/api/db/update" : "/api/db/write",
+      update ? "Registro atualizado." : "Registro gravado.",
+      {
+        id: idInput.value.trim(),
+        mensagem: document.querySelector("#message").value,
+        origem: document.querySelector("#origin").value
+      }
+    );
+    if (result?.record) idInput.value = result.record.id;
+  });
 
-const readRecords = async () => {
-  try {
-    const { table } = getSettings();
-    const data = await request(`/api/db/read?table=${encodeURIComponent(table)}`);
-    showResult("Leitura concluída.", data);
-  } catch (error) {
-    showResult(`Erro na leitura: ${error.message}`, { error: error.message });
-  }
-};
-
-const runGet = async (url, message) => {
-  try {
-    showResult(message, await request(url));
-  } catch (error) {
-    showResult(`Erro: ${error.message}`, { error: error.message });
-  }
-};
-
-neonSetupForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  try {
-    const data = await request("/api/neon/setup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        projectId: document.querySelector("#project-id").value,
-        branch: document.querySelector("#branch").value,
-        roleName: document.querySelector("#role-name").value,
-        databaseName: document.querySelector("#database-name").value
-      })
-    });
-    showResult("Conexão configurada. Agora teste a conexão.", data);
-  } catch (error) {
-    showResult(`Erro na configuração: ${error.message}`, { error: error.message });
-  }
-});
-
-healthButton.addEventListener("click", () => runGet("/api/db/health", "Conexão com o Neon concluída."));
-tablesButton.addEventListener("click", () => runGet("/api/db/tables", "Tabelas encontradas."));
-columnsButton.addEventListener("click", () => {
-  try {
-    const { table } = getSettings();
-    runGet(`/api/db/columns?table=${encodeURIComponent(table)}`, "Colunas encontradas.");
-  } catch (error) {
-    showResult(`Erro: ${error.message}`, { error: error.message });
-  }
-});
-
-debugForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  try {
-    const { table } = getSettings();
-    const payload = JSON.parse(document.querySelector("#payload").value);
-    const data = await request("/api/db/write", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ table, ...payload })
-    });
-    showResult("Gravação concluída.", data);
-  } catch (error) {
-    showResult(`Erro na gravação: ${error.message}`, { error: error.message });
-  }
-});
-
-readButton.addEventListener("click", readRecords);
-
-mutationForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  try {
-    const { table } = getSettings();
-    const id = document.querySelector("#record-id").value;
-    const values = JSON.parse(document.querySelector("#update-payload").value);
-    showResult("Atualização concluída.", await request("/api/db/update", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ table, id, values })
-    }));
-  } catch (error) {
-    showResult(`Erro na atualização: ${error.message}`, { error: error.message });
-  }
-});
-
-deleteButton.addEventListener("click", async () => {
-  try {
-    const { table } = getSettings();
-    const id = document.querySelector("#record-id").value;
-    showResult("Exclusão concluída.", await request("/api/db/delete", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ table, id })
-    }));
-  } catch (error) {
-    showResult(`Erro na exclusão: ${error.message}`, { error: error.message });
-  }
-});
-
-queryForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  try {
-    const data = await request("/api/db/query", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sql: document.querySelector("#query").value })
-    });
-    showResult("Consulta concluída.", data);
-  } catch (error) {
-    showResult(`Erro na consulta: ${error.message}`, { error: error.message });
-  }
-});
+  document.querySelector("#delete-button").addEventListener("click", async () => {
+    if (busy || !hasRecordId()) return;
+    const id = idInput.value.trim();
+    if (!window.confirm(`Excluir o registro ${id}?`)) return;
+    const result = await run("/api/db/delete", "Registro excluído.", { id });
+    if (result?.ok) idInput.value = "";
+  });
+})();

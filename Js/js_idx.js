@@ -22,9 +22,15 @@ const registerForm = document.querySelector("#register-form");
 const registerStatus = document.querySelector("#register-status");
 const recordForm = document.querySelector("#record-form");
 const recordStatus = document.querySelector("#record-status");
-const API_BASE = String(window.PWPCD_API_BASE || "").replace(/\/$/, "");
-
-const apiFetch = (path, options) => fetch(`${API_BASE}${path}`, options);
+const apiFetch = async (path, options) => {
+  const response = await fetch(path, options);
+  if (!response.headers.get("Content-Type")?.includes("application/json")) {
+    throw new Error("Abra a versão do site hospedada no Cloudflare Workers.");
+  }
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || "Não foi possível concluir a operação.");
+  return data;
+};
 
 const applyTheme = (theme, themeToggle = null) => {
   document.body.setAttribute("data-theme", theme);
@@ -58,8 +64,7 @@ const initHeaderLinks = () => {
 
 const initUserControls = async () => {
   try {
-    const response = await apiFetch("/api/session");
-    const data = await response.json();
+    const data = await apiFetch("/api/session");
     if (!data.authenticated || !data.username) return;
     const headerUser = document.createElement("span");
     headerUser.className = "user-display";
@@ -71,6 +76,23 @@ const initUserControls = async () => {
     sidebarUser.innerHTML = `<span class="sidebar-user__name"></span>`;
     sidebarUser.querySelector(".sidebar-user__name").textContent = data.username;
     document.querySelector(".side-panel__nav")?.before(sidebarUser);
+
+    const logoutButton = document.createElement("button");
+    logoutButton.type = "button";
+    logoutButton.className = "header-link";
+    logoutButton.textContent = "Sair";
+    logoutButton.addEventListener("click", async () => {
+      logoutButton.disabled = true;
+      try {
+        await apiFetch("/api/logout", { method: "POST" });
+        window.location.reload();
+      } catch (error) {
+        logoutButton.textContent = "Tentar sair novamente";
+        logoutButton.title = error.message;
+        logoutButton.disabled = false;
+      }
+    });
+    document.querySelector(".header-links")?.append(logoutButton);
   } catch {
     return;
   }
@@ -96,7 +118,7 @@ const initLogin = () => {
     loginStatus.textContent = "Entrando...";
 
     try {
-      const response = await apiFetch("/api/login", {
+      await apiFetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -104,8 +126,6 @@ const initLogin = () => {
           password_hash: await hashPassword(document.querySelector("#senha").value)
         })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Login recusado pelo Neon Auth.");
       window.location.href = "categorias.html";
     } catch (error) {
       loginStatus.textContent = `Erro no login: ${error.message}`;
@@ -125,8 +145,11 @@ const initRegister = () => {
   if (!registerForm || !registerStatus) return;
   registerForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+    const submitButton = registerForm.querySelector("button[type=submit]");
+    submitButton.disabled = true;
+    registerStatus.textContent = "Registrando...";
     try {
-      const response = await apiFetch("/api/register", {
+      await apiFetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -134,11 +157,11 @@ const initRegister = () => {
           password_hash: await hashPassword(document.querySelector("#register-password").value)
         })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Não foi possível registrar.");
       window.location.href = "categorias.html";
     } catch (error) {
       registerStatus.textContent = `Erro no cadastro: ${error.message}`;
+    } finally {
+      submitButton.disabled = false;
     }
   });
 };
@@ -153,7 +176,7 @@ const initRecordForm = () => {
     recordStatus.textContent = "Salvando...";
 
     try {
-      const response = await apiFetch("/api/records", {
+      const data = await apiFetch("/api/records", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -161,8 +184,6 @@ const initRecordForm = () => {
           origem: document.querySelector("#record-origin").value
         })
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Não foi possível salvar o registro.");
       recordStatus.textContent = `Registro ${data.record.id} salvo com sucesso.`;
       recordForm.reset();
       document.querySelector("#record-origin").value = "site";

@@ -1,0 +1,2 @@
+DATABASE_URL="postgresql://usuario:senha@host.neon.tech/neondb?sslmode=require"
+# PWPCD_ADMIN_TOKEN="chave-aleatoria-de-pelo-menos-32-caracteres"

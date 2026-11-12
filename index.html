@@ -36,7 +36,7 @@
             <p class="eyebrow">Área de acesso</p>
             <h2 id="login-title">Entre para continuar</h2>
             <p class="login-description">Entre com um usuário cadastrado no sistema.</p>
-            <form id="login-form">
+            <form id="login-form" method="post" action="/api/login">
               <label for="email">Usuário</label>
               <input id="email" name="email" autocomplete="username" required>
               <label for="senha">Senha</label>
@@ -45,7 +45,7 @@
             </form>
             <p id="login-status" class="debug-status" role="status" aria-live="polite"></p>
             <h3>Registrar usuário</h3>
-            <form id="register-form">
+            <form id="register-form" method="post" action="/api/register">
               <label for="register-username">Usuário</label>
               <input id="register-username" autocomplete="username" required>
               <label for="register-password">Senha</label>
@@ -59,7 +59,7 @@
             <p class="eyebrow">Banco de dados</p>
             <h2 id="record-title">Adicionar registro</h2>
             <p class="login-description">Os dados são enviados ao PostgreSQL pelo servidor.</p>
-            <form id="record-form">
+            <form id="record-form" method="post" action="/api/records">
               <label for="record-message">Mensagem</label>
               <textarea id="record-message" rows="4" maxlength="5000" required></textarea>
               <label for="record-origin">Origem</label>

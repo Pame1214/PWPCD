@@ -2,13 +2,16 @@
   "name": "pwpcd",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "worker.mjs",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "start": "node debug/server.js",
+    "start": "npm run preview",
     "build:static": "node scripts/build-static.js",
     "deploy": "npm run build:static && wrangler deploy",
     "preview": "npm run build:static && wrangler dev",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "node --check worker.mjs && node --check Js/js_idx.js && node --check debug/debug.js && npm run deploy -- --dry-run"
   },
   "repository": {
     "type": "git",
@@ -22,10 +25,10 @@
     "url": "https://github.com/Pame1214/PWPCD/issues"
   },
   "homepage": "https://github.com/Pame1214/PWPCD#readme",
-  "dependencies": {
-    "pg": "^8.23.0"
-  },
   "devDependencies": {
     "wrangler": "^4.130.0"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0"
   }
 }
