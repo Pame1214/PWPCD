@@ -1,8 +1,16 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "pwpcd",
+  "main": "worker.mjs",
   "compatibility_date": "2026-09-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "ratelimits": [
+    { "name": "AUTH_LIMIT", "namespace_id": "780214", "simple": { "limit": 30, "period": 60 } }
+  ],
   "assets": {
-    "directory": "./.cloudflare-static"
+    "directory": "./.cloudflare-static",
+    "binding": "ASSETS",
+    "html_handling": "none",
+    "run_worker_first": ["/", "/api", "/api/*", "/debug", "/debug/*"]
   }
 }
